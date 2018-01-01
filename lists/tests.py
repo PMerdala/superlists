@@ -12,13 +12,10 @@ class HomePageTest(TestCase):
 		self.assertEqual(found.func,home_page)
 		
 	def test_home_page_returns_correct_html(self):
-		request = HttpRequest()
-		response = home_page(request)
-		#sprawdzenie czy szablon jest choć trochę zgodny z założeniem
-		#gdybym zrezygnował z tego sprawdzenia mógłbym w szablon wpisać cokolwiek
-		self.assertTrue(response.content.startswith(b'<html>'))
-		self.assertIn(b'<title>Listy rzeczy do zrobienia</title>',response.content)
-		self.assertTrue(response.content.strip().endswith(b'</html>'))
-		#sprawdzenie czy wynik pobrania strony jest zgodny z szablonem
-		expected_html = render_to_string('home.html')
-		self.assertEqual(response.content.decode(),expected_html)
+		response = self.client.get('/')
+		self.assertTemplateUsed(response,'home.html')
+		
+	def test_home_page_can_save_a_POST_request(self):
+		response = self.client.post('/',data={'item_text': 'A new list item'})
+		self.assertIn('A new list item',response.content.decode())
+		self.assertTemplateUsed(response,'home.html')
